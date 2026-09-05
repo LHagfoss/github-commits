@@ -26,8 +26,9 @@ interface GitHubCommitsProps extends UseGitHubContributionsOptions {
     colors?: ColorPalette;
     loadingLabel?: string;
     errorLabel?: string;
+    contributionLabel?: string;
 }
 type ColorPalette = [string, string, string, string, string];
-declare function GitHubCommits({ username, year, endpoint, className, style, profileUrl, weeks, showFooter, colors, loadingLabel, errorLabel, }: GitHubCommitsProps): react.JSX.Element;
+declare function GitHubCommits({ username, year, endpoint, className, style, profileUrl, weeks, showFooter, colors, loadingLabel, errorLabel, contributionLabel, }: GitHubCommitsProps): react.JSX.Element;
 
 export { type ContributionDay, type ContributionLevel, GitHubCommits, type GitHubCommitsProps, type UseGitHubContributionsOptions, useGitHubContributions };

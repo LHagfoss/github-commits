@@ -1,6 +1,6 @@
 {
   "name": "@lhagfoss/github-commits",
-  "version": "0.1.1",
+  "version": "0.1.2",
   "description": "A responsive GitHub contribution graph for React.",
   "license": "MIT",
   "type": "module",

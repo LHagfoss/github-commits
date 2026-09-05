@@ -68,6 +68,7 @@ export interface GitHubCommitsProps extends UseGitHubContributionsOptions {
   colors?: ColorPalette;
   loadingLabel?: string;
   errorLabel?: string;
+  contributionLabel?: string;
 }
 
 type ColorPalette = [string, string, string, string, string];
@@ -92,10 +93,11 @@ export function GitHubCommits({
   colors = defaultColors,
   loadingLabel = "Loading activity…",
   errorLabel = "Could not load activity.",
+  contributionLabel = "contribution",
 }: GitHubCommitsProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [visibleWeeks, setVisibleWeeks] = useState(weeks);
-  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
+  const [activeDate, setActiveDate] = useState<string | null>(null);
   const { contributions, loading, error } = useGitHubContributions({ username, year, endpoint });
 
   useEffect(() => {
@@ -125,7 +127,7 @@ export function GitHubCommits({
         <p role="status" style={{ margin: 0, opacity: 0.6 }}>{errorLabel}</p>
       ) : (
         <div
-          role="img"
+          role="grid"
           aria-label={`${total} GitHub contributions in the displayed period`}
           style={{
             display: "grid",
@@ -136,21 +138,32 @@ export function GitHubCommits({
             gridAutoFlow: "column",
           }}
         >
-          {days.map((day) => (
+          {days.map((day) => {
+            const isActive = activeDate === day.date;
+            const countLabel = `${contributionLabel}${day.count === 1 ? "" : "s"}`;
+
+            return (
             <span
               key={day.date}
-              onPointerEnter={() => setHoveredDate(day.date)}
-              onPointerLeave={() => setHoveredDate(null)}
+              role="gridcell"
+              tabIndex={0}
+              aria-label={`${day.count} ${countLabel} on ${day.date}`}
+              onPointerEnter={() => setActiveDate(day.date)}
+              onPointerLeave={() => setActiveDate(null)}
+              onFocus={() => setActiveDate(day.date)}
+              onBlur={() => setActiveDate(null)}
               style={{
                 position: "relative",
-                zIndex: hoveredDate === day.date ? 1 : 0,
+                zIndex: isActive ? 1 : 0,
                 display: "block",
                 aspectRatio: "1",
                 borderRadius: 2,
                 background: colors[day.level],
-                transform: hoveredDate === day.date ? "scale(1.16)" : "scale(1)",
-                transition: "transform 160ms ease, filter 160ms ease",
-                filter: hoveredDate === day.date ? "brightness(1.18)" : "brightness(1)",
+                outline: "none",
+                cursor: "default",
+                transform: isActive ? "scale(1.18)" : "scale(1)",
+                transition: "transform 180ms cubic-bezier(0.22, 1, 0.36, 1), filter 180ms ease",
+                filter: isActive ? "brightness(1.2)" : "brightness(1)",
               }}
             >
               <span
@@ -168,19 +181,20 @@ export function GitHubCommits({
                   lineHeight: 1.2,
                   whiteSpace: "nowrap",
                   pointerEvents: "none",
-                  opacity: hoveredDate === day.date ? 1 : 0,
-                  transform: hoveredDate === day.date
+                  opacity: isActive ? 1 : 0,
+                  transform: isActive
                     ? "translate(-50%, 0) scale(1)"
                     : "translate(-50%, 4px) scale(0.96)",
                   transformOrigin: "bottom center",
-                  transition: "opacity 140ms ease, transform 160ms ease",
+                  transition: "opacity 140ms ease, transform 180ms cubic-bezier(0.22, 1, 0.36, 1)",
                   boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
                 }}
               >
-                {day.count} {day.count === 1 ? "contribution" : "contributions"} · {day.date}
+                {day.count} {countLabel} · {day.date}
               </span>
             </span>
-          ))}
+            );
+          })}
         </div>
       )}
       {showFooter && (
