@@ -95,6 +95,7 @@ export function GitHubCommits({
 }: GitHubCommitsProps) {
   const rootRef = useRef<HTMLDivElement>(null);
   const [visibleWeeks, setVisibleWeeks] = useState(weeks);
+  const [hoveredDate, setHoveredDate] = useState<string | null>(null);
   const { contributions, loading, error } = useGitHubContributions({ username, year, endpoint });
 
   useEffect(() => {
@@ -138,9 +139,47 @@ export function GitHubCommits({
           {days.map((day) => (
             <span
               key={day.date}
-              title={`${day.count} contributions on ${day.date}`}
-              style={{ aspectRatio: "1", borderRadius: 2, background: colors[day.level] }}
-            />
+              onPointerEnter={() => setHoveredDate(day.date)}
+              onPointerLeave={() => setHoveredDate(null)}
+              style={{
+                position: "relative",
+                zIndex: hoveredDate === day.date ? 1 : 0,
+                display: "block",
+                aspectRatio: "1",
+                borderRadius: 2,
+                background: colors[day.level],
+                transform: hoveredDate === day.date ? "scale(1.16)" : "scale(1)",
+                transition: "transform 160ms ease, filter 160ms ease",
+                filter: hoveredDate === day.date ? "brightness(1.18)" : "brightness(1)",
+              }}
+            >
+              <span
+                aria-hidden="true"
+                style={{
+                  position: "absolute",
+                  bottom: "calc(100% + 8px)",
+                  left: "50%",
+                  padding: "6px 8px",
+                  border: "1px solid rgba(255, 255, 255, 0.14)",
+                  borderRadius: 6,
+                  background: "#171717",
+                  color: "#fafafa",
+                  fontSize: 12,
+                  lineHeight: 1.2,
+                  whiteSpace: "nowrap",
+                  pointerEvents: "none",
+                  opacity: hoveredDate === day.date ? 1 : 0,
+                  transform: hoveredDate === day.date
+                    ? "translate(-50%, 0) scale(1)"
+                    : "translate(-50%, 4px) scale(0.96)",
+                  transformOrigin: "bottom center",
+                  transition: "opacity 140ms ease, transform 160ms ease",
+                  boxShadow: "0 8px 24px rgba(0, 0, 0, 0.35)",
+                }}
+              >
+                {day.count} {day.count === 1 ? "contribution" : "contributions"} · {day.date}
+              </span>
+            </span>
           ))}
         </div>
       )}
